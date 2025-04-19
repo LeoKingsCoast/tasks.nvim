@@ -1,6 +1,5 @@
 local M = {}
 
--- foo
 local picker_search = function (pattern, path)
   path = path or '.'
   local cmd = { 'rg', '--vimgrep', pattern, path }
