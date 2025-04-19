@@ -18,4 +18,10 @@ M.new = function (desc, path)
   return new_task
 end
 
+M.finish = function (task)
+  if not task.done then
+    task.done = true
+  end
+end
+
 return M
