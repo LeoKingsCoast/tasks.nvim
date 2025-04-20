@@ -28,10 +28,12 @@ local picker_search = function (pattern, path)
 
   local result = vim.fn.jobwait( { search_job }, -1)
 
-  if result[1] == 0 then
+  if result[1] == 0 then -- Success
     return output
-  else
-    vim.api.nvim_echo({ { 'Search for task failed or timed out', 'ErrorMsg' } }, true, { err = true })
+  elseif result[1] == 1 then -- No matches found
+    return {}
+  else -- Error occoured
+    vim.api.nvim_echo({ { 'Error detected when searching with ripgrep', 'ErrorMsg' } }, true, { err = true })
     return {}
   end
 end

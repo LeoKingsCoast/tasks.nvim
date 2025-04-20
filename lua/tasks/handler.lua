@@ -1,3 +1,5 @@
+local task = require("tasks.task")
+
 local M = {}
 
 -- This is the best parser, but lua is not fully compatible with regex. Find solution later.
@@ -10,10 +12,9 @@ local M = {}
 
 local search = require("tasks.search")
 
----@param string
----@return table
-M.format_task = function (grepped_string)
-  -- grepped_string = "./search.sh:21:1:   # TODO: Test this"
+---@param grepped_string string
+---@return Task|nil
+M.parse_task = function (grepped_string)
   local path_parser = "./(.*):(%d*):(%d*):(.*)"
   local path, row, col, content = grepped_string:match(path_parser)
 
@@ -24,27 +25,26 @@ M.format_task = function (grepped_string)
 
   local desc = content:match(lua_parser) or content:match(c_parser) or content:match(hash_parser) or content:match(mkdown_parser)
 
-  local task_info = {
-    file_path = path,
-    row = tonumber(row),
-    col = tonumber(col),
-    description = desc,
-  }
+  -- If description or file_path parsing fails, this will return nil
+  local new_task = task.new(desc, { file_path = path, row = row, col = col })
 
-  return task_info
+  return new_task
 end
 
-M.search_tasks = function ()
-  local results = search.search("TODO:", ".")
+---@return Task[]
+M.search_tasks = function (root_dir)
+  local task_list = {}
+  local results = search.search("TODO:|- \\[ \\]", root_dir)
+  local new_task
+
   for _, result in ipairs(results) do
-    
+    new_task = M.parse_task(result)
+    if new_task then
+      table.insert(task_list, new_task)
+    end
   end
-end
 
-local str = "I am a string"
-local pattern = "(.*) am a (.*)"
-local gotten1, gotten2 = str:match(pattern)
-print(gotten1)
-print(gotten2)
+  return task_list
+end
 
 return M

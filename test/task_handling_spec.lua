@@ -8,22 +8,26 @@ describe("tasks.tasks", function ()
       done = false,
       path = {
         file_path = "path/to/file",
+        row = 20,
+        col = 5,
+      }
+    }, task.new("Run benchmarks", { file_path = "path/to/file", row = 20, col = 5 }))
+  end)
+
+  it("new should create a task with row 1 and col 1 if not specified", function ()
+    assert.are.same({
+      description = "Run benchmarks",
+      done = false,
+      path = {
+        file_path = "path/to/file",
         row = 1,
         col = 1,
       }
-    }, task.new("Run benchmarks", "path/to/file"))
+    }, task.new("Run benchmarks", { file_path = "path/to/file" }))
   end)
 
-  it("new should create an empty task", function ()
-    assert.are.same({
-      description = nil,
-      done = false,
-      path = {
-        file_path = nil,
-        row = 1,
-        col = 1
-      },
-    }, task.new())
+  it("new should return nil on a task created without description or path", function ()
+    assert.are.same(nil, task.new())
   end)
 
   it("finish should mark a task as done", function ()
@@ -42,7 +46,7 @@ describe("tasks.tasks", function ()
       row = 1,
       col = 4,
       description = "Make the tasks window"
-    }, handler.format_task(grepped_task))
+    }, handler.parse_task(grepped_task))
   end)
 
   it("format_task should make a task from a TODO C style comment", function ()
@@ -52,7 +56,7 @@ describe("tasks.tasks", function ()
       row = 53,
       col = 1,
       description = "Run valgrind"
-    }, handler.format_task(grepped_task))
+    }, handler.parse_task(grepped_task))
   end)
 
   it("format_task should make a task from a TODO hash comment", function ()
@@ -62,7 +66,7 @@ describe("tasks.tasks", function ()
       row = 21,
       col = 1,
       description = "Test this"
-    }, handler.format_task(grepped_task))
+    }, handler.parse_task(grepped_task))
   end)
 
   it("format_task should make a task from a markdown checklist item", function ()
@@ -72,6 +76,6 @@ describe("tasks.tasks", function ()
       row = 10,
       col = 8,
       description = "Buy milk"
-    }, handler.format_task(grepped_task))
+    }, handler.parse_task(grepped_task))
   end)
 end)

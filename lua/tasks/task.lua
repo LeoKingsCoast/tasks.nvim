@@ -1,23 +1,27 @@
 ---@class Task
 ---@field description string
 ---@field done boolean
----@field path string
+---@field path table
 
 M = {}
 
 ---@param desc string
 ---@param path table
----@return Task
-M.new = function (desc, path_str)
-  local path = {
-    file_path = path_str,
-    row = 1,
-    col = 1,
+---@return Task|nil
+M.new = function (desc, path)
+  if desc == nil or path == nil then
+    return nil
+  end
+
+  local task_path = {
+    file_path = path.file_path,
+    row = tonumber(path.row) or 1,
+    col = tonumber(path.col) or 1,
   }
   local new_task = {
     description = desc,
     done = false,
-    path = path
+    path = task_path
   }
 
   return new_task
