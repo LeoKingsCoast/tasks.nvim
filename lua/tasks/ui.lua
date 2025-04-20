@@ -50,6 +50,7 @@ local M = {}
 
 ---@param task_window TaskWindow
 local configure_task_window = function (task_window)
+  vim.bo[task_window.body.buf].filetype = "markdown"
   vim.api.nvim_win_set_cursor(task_window.body.win, {1, 1})
 
   vim.keymap.set("n", "q", function ()
@@ -91,7 +92,10 @@ local fill_tasks = function (task_window, root_dir)
   local tasks = handler.search_tasks(root_dir)
   local content = {}
   for _, task in ipairs(tasks) do
-    table.insert(content, task.description)
+    local item = "- [ ] " .. task.description
+    local location = "  -> In file " .. task.path.file_path .. ":" .. task.path.row .. ":" .. task.path.col
+    table.insert(content, item)
+    table.insert(content, location)
   end
 
   vim.api.nvim_buf_set_lines(task_window.body.buf, 0, -1, false, content)
