@@ -28,8 +28,7 @@ int main(){
 Hello, I am a markdown file :)
 Nothing to see here
 
-- [ ] Buy milk
-    ]], "w")
+- [ ] Buy milk]], "w")
 
   end)
 
@@ -65,12 +64,12 @@ Nothing to see here
   end)
 
   it("Marks a markdown task as done", function ()
-    file.markdown_task_check({ file_path = "test/test_files/dir2/c", row = 3, col = 1})
+    file.markdown_task_check({ file_path = "test/test_files/dir2/c", row = 6, col = 1})
 
     local passed_lines = {}
     local file_after = io.open("test/test_files/dir2/c", "r")
     if not file_after then
-      vim.notify("Could not open file: test/test_files/dir1/b", vim.log.levels.ERROR)
+      vim.notify("Could not open file: test/test_files/dir2/b", vim.log.levels.ERROR)
       return
     end
 
