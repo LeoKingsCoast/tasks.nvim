@@ -56,7 +56,7 @@ local configure_task_window = function (task_window)
   vim.keymap.set("n", "q", function ()
     vim.api.nvim_win_close(task_window.body.win, true)
   end, {
-      buffer = task_window.body.buf
+      buffer = task_window.body.buf,
     })
 
   vim.api.nvim_create_autocmd("BufLeave", {
@@ -66,6 +66,31 @@ local configure_task_window = function (task_window)
       pcall(vim.api.nvim_win_close, task_window.background.win, true)
     end
   })
+
+  vim.api.nvim_create_autocmd("BufEnter", {
+    buffer = task_window.body.buf,
+    callback = function()
+      vim.cmd("stopinsert")
+    end,
+  })
+
+  -- vim.api.nvim_buf_set_option(task_window.body.buf, 'buftype', 'nofile')
+  -- vim.api.nvim_buf_set_option(task_window.body.buf, 'bufhidden', 'wipe')
+  -- vim.api.nvim_buf_set_option(task_window.body.buf, 'swapfile', false)
+end
+
+---@param task_window TaskWindow
+local lock_window = function (task_window)
+  vim.api.nvim_buf_set_option(task_window.body.buf, 'modifiable', false)
+  vim.api.nvim_buf_set_option(task_window.background.buf, 'modifiable', false)
+  vim.api.nvim_buf_set_option(task_window.title.buf, 'modifiable', false)
+end
+
+---@param task_window TaskWindow
+local unlock_window = function (task_window)
+  vim.api.nvim_buf_set_option(task_window.body.buf, 'modifiable', true)
+  vim.api.nvim_buf_set_option(task_window.background.buf, 'modifiable', true)
+  vim.api.nvim_buf_set_option(task_window.title.buf, 'modifiable', true)
 end
 
 ---@param task_window TaskWindow
@@ -119,6 +144,7 @@ end
 M._fill = function (task_window, root_dir)
   fill_title(task_window)
   fill_tasks(task_window, root_dir)
+  lock_window(task_window)
 end
 
 ---@param task_window TaskWindow
