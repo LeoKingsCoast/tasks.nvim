@@ -33,4 +33,12 @@ M.finish = function (task)
   end
 end
 
+M.toggle = function (task)
+  if not task.done then
+    task.done = true
+  else
+    task.done = false
+  end
+end
+
 return M

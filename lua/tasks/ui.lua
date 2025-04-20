@@ -7,6 +7,11 @@ local win_height = math.floor(vim.o.lines * 0.7)
 local x_pos = math.floor((vim.o.columns - win_width) / 2)
 local y_pos = math.floor((vim.o.lines - win_height) / 2)
 
+local cursor_pos = {1, 1}
+local selection_pos = 1
+
+local root_dir = "."
+
 ---@type vim.api.keyset.win_config[]
 local win_config = {
   background = {
@@ -66,18 +71,66 @@ local configure_task_window = function (task_window)
       pcall(vim.api.nvim_win_close, task_window.background.win, true)
     end
   })
-
-  vim.api.nvim_create_autocmd("BufEnter", {
-    buffer = task_window.body.buf,
-    callback = function()
-      vim.cmd("stopinsert")
-    end,
-  })
-
   -- vim.api.nvim_buf_set_option(task_window.body.buf, 'buftype', 'nofile')
   -- vim.api.nvim_buf_set_option(task_window.body.buf, 'bufhidden', 'wipe')
   -- vim.api.nvim_buf_set_option(task_window.body.buf, 'swapfile', false)
 end
+
+---@param task_window TaskWindow
+local configure_cursor = function (task_window)
+  vim.api.nvim_set_hl(0, "TaskWindowCursorHighlight", { blend = 100, bg = "#333333" })
+
+  -- vim.wo[task_window.body.win].cursorline = true
+  -- vim.wo[task_window.body.win].wrap = false
+
+  local ns = vim.api.nvim_create_namespace("my_selector")
+  -- Setup selection logic
+  local function highlight_line(line)
+    vim.api.nvim_buf_clear_namespace(task_window.body.buf, ns, 0, -1)
+    vim.api.nvim_buf_set_extmark(task_window.body.buf, ns, line, 0, {
+      end_row = line + 2,
+      hl_group = "TaskWindowCursorHighlight",
+      hl_eol = true,
+    })
+  end
+
+  vim.api.nvim_create_autocmd("CursorMoved", {
+    buffer = task_window.body.buf,
+    callback = function ()
+      selection_pos = math.ceil(cursor_pos[1] / 2)
+      highlight_line(cursor_pos[1] - 1)
+      vim.print("Task number: " .. selection_pos)
+    end
+  })
+
+  vim.keymap.set("n", "j", function ()
+    local current_pos = vim.api.nvim_win_get_cursor(task_window.body.win)
+    cursor_pos = { current_pos[1] + 2, current_pos[2] }
+
+    local body_lines = vim.api.nvim_buf_line_count(task_window.body.buf)
+    if cursor_pos[1] > body_lines then
+      cursor_pos[1] = body_lines - 1
+    end
+
+    vim.api.nvim_win_set_cursor(task_window.body.win, cursor_pos)
+  end, {
+      buffer = task_window.body.buf,
+    })
+
+  vim.keymap.set("n", "k", function ()
+    local current_pos = vim.api.nvim_win_get_cursor(task_window.body.win)
+    cursor_pos = { current_pos[1] - 2, current_pos[2] }
+
+    if cursor_pos[1] < 1 then
+      cursor_pos[1] = 1
+    end
+
+    vim.api.nvim_win_set_cursor(task_window.body.win, cursor_pos)
+  end, {
+      buffer = task_window.body.buf,
+    })
+end
+
 
 ---@param task_window TaskWindow
 local lock_window = function (task_window)
@@ -116,14 +169,32 @@ end
 ---@param tasks Task[]
 local fill_tasks = function (task_window, tasks)
   local content = {}
+  local completion_marker
   for _, task in ipairs(tasks) do
-    local item = "- [ ] " .. task.description
+    if task.done then
+      completion_marker = 'x'
+    else
+      completion_marker = ' '
+    end
+    local item = "- [" .. completion_marker .. "] " .. task.description
     local location = "  -> In file " .. task.path.file_path .. ":" .. task.path.row .. ":" .. task.path.col
     table.insert(content, item)
     table.insert(content, location)
   end
 
   vim.api.nvim_buf_set_lines(task_window.body.buf, 0, -1, false, content)
+end
+
+---@param task_window TaskWindow
+local configure_commands = function (task_window)
+  vim.keymap.set("n", "<CR>", function ()
+    core.task_toggle(selection_pos)
+    unlock_window(task_window)
+    fill_tasks(task_window, core.get_tasks(root_dir))
+    lock_window(task_window)
+  end, {
+      buffer = task_window.body.buf
+    })
 end
 
 M.open = function ()
@@ -135,13 +206,18 @@ M.open = function ()
   }
 
   configure_task_window(task_window)
+  configure_cursor(task_window)
+  configure_commands(task_window)
 
   return task_window
 end
 
 ---@param task_window TaskWindow
----@param root_dir string
-M._fill = function (task_window, root_dir)
+---@param dir string
+M._fill = function (task_window, dir)
+  if dir then
+    root_dir = dir
+  end
   fill_title(task_window)
   fill_tasks(task_window, core.get_tasks(root_dir))
   lock_window(task_window)
