@@ -42,9 +42,12 @@ describe("tasks.tasks", function ()
   it("format_task should make a task from a TODO lua comment", function ()
     local grepped_task = "./lua/tasks/window.lua:1:4:-- TODO: Make the tasks window"
     assert.are.same({
-      file_path = "lua/tasks/window.lua",
-      row = 1,
-      col = 4,
+      path = {
+        file_path = "lua/tasks/window.lua",
+        row = 1,
+        col = 4,
+      },
+      done = false,
       description = "Make the tasks window"
     }, handler.parse_task(grepped_task))
   end)
@@ -52,9 +55,12 @@ describe("tasks.tasks", function ()
   it("format_task should make a task from a TODO C style comment", function ()
     local grepped_task = "./utils/str.c:53:1://TODO: Run valgrind"
     assert.are.same({
-      file_path = "utils/str.c",
-      row = 53,
-      col = 1,
+      path = {
+        file_path = "utils/str.c",
+        row = 53,
+        col = 1,
+      },
+      done = false,
       description = "Run valgrind"
     }, handler.parse_task(grepped_task))
   end)
@@ -62,9 +68,12 @@ describe("tasks.tasks", function ()
   it("format_task should make a task from a TODO hash comment", function ()
     local grepped_task = "./search.sh:21:1:   # TODO: Test this"
     assert.are.same({
-      file_path = "search.sh",
-      row = 21,
-      col = 1,
+      path = {
+        file_path = "search.sh",
+        row = 21,
+        col = 1,
+      },
+      done = false,
       description = "Test this"
     }, handler.parse_task(grepped_task))
   end)
@@ -72,9 +81,12 @@ describe("tasks.tasks", function ()
   it("format_task should make a task from a markdown checklist item", function ()
     local grepped_task = "./Documents/notes.md:10:8:- [ ] Buy milk"
     assert.are.same({
-      file_path = "Documents/notes.md",
-      row = 10,
-      col = 8,
+      path = {
+        file_path = "Documents/notes.md",
+        row = 10,
+        col = 8,
+      },
+      done = false,
       description = "Buy milk"
     }, handler.parse_task(grepped_task))
   end)
