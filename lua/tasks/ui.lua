@@ -1,5 +1,5 @@
 local window = require("tasks.window")
-local handler = require("tasks.handler")
+local core = require("tasks.core")
 
 local win_width = math.floor(vim.o.columns * 0.7)
 local win_height = math.floor(vim.o.lines * 0.7)
@@ -113,8 +113,8 @@ local fill_title = function (task_window)
 end
 
 ---@param task_window TaskWindow
-local fill_tasks = function (task_window, root_dir)
-  local tasks = handler.search_tasks(root_dir)
+---@param tasks Task[]
+local fill_tasks = function (task_window, tasks)
   local content = {}
   for _, task in ipairs(tasks) do
     local item = "- [ ] " .. task.description
@@ -143,7 +143,7 @@ end
 ---@param root_dir string
 M._fill = function (task_window, root_dir)
   fill_title(task_window)
-  fill_tasks(task_window, root_dir)
+  fill_tasks(task_window, core.get_tasks(root_dir))
   lock_window(task_window)
 end
 
