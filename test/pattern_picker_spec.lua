@@ -32,8 +32,7 @@ describe("tasks.search", function ()
 -- TODO: Make sure to return 0
 int main(){
         printf("Hello, World!");
-}
-    ]], "w")
+}]], "w")
 
     files.c:write([[
 # Heading
@@ -41,8 +40,7 @@ int main(){
 Hello, I am a markdown file :)
 Nothing to see here
 
-- [ ] Buy milk
-    ]], "w")
+- [ ] Buy milk]], "w")
 
   end)
 

@@ -22,4 +22,14 @@ M.task_toggle = function (task_index)
   task.toggle(task_list[task_index])
 end
 
+M.jump_to_task = function ()
+end
+
+M.write_state = function ()
+  for _, task_item in ipairs(task_list) do
+    if task_item.done then
+    end
+  end
+end
+
 return M
