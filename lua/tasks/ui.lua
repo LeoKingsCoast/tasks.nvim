@@ -1,32 +1,125 @@
--- This handles the creation and manipulation of task windows
+local window = require("tasks.window")
+local handler = require("tasks.handler")
+
+local win_width = math.floor(vim.o.columns * 0.7)
+local win_height = math.floor(vim.o.lines * 0.7)
+
+local x_pos = math.floor((vim.o.columns - win_width) / 2)
+local y_pos = math.floor((vim.o.lines - win_height) / 2)
+
+---@type vim.api.keyset.win_config[]
+local win_config = {
+  background = {
+    relative = "editor",
+    width = win_width,
+    height = win_height,
+    row = y_pos,
+    col = x_pos,
+    style = "minimal",
+    border = "rounded",
+    zindex = 1
+  },
+  title = {
+    relative = "editor",
+    width = win_width,
+    height = 3,
+    row = y_pos,
+    col = x_pos,
+    style = "minimal",
+    border = "rounded",
+    zindex = 2
+  },
+  body = {
+    relative = "editor",
+    width = win_width,
+    height = win_height - 5,
+    row = y_pos + 5,
+    col = x_pos,
+    style = "minimal",
+    border = "rounded",
+    zindex = 2
+  }
+}
 
 local M = {}
 
-function M.create_floating_window (opts)
-  opts = opts or { buf = -1, config = {
-    relative = "editor",
-    width = 50,
-    height = 20,
-    row = 10,
-    col = 30,
-    style = "minimal",
-    border = "rounded"
-  } }
+---@class TaskWindow
+---@field background table: { [buf], [win] }
+---@field title table: { [buf], [win] }
+---@field body table: { [buf], [win] }
 
-  -- Create a buffer
-  local buf = nil
-  if vim.api.nvim_buf_is_valid(opts.buf) then
-    buf = opts.buf
-  else
-    -- `listed = false` makes it not a file
-    -- `scratch = true` makes it a throwaway buffer
-    buf = vim.api.nvim_create_buf(false, true)
+---@param task_window TaskWindow
+local configure_task_window = function (task_window)
+  vim.api.nvim_win_set_cursor(task_window.body.win, {1, 1})
+
+  vim.keymap.set("n", "q", function ()
+    vim.api.nvim_win_close(task_window.body.win, true)
+  end, {
+      buffer = task_window.body.buf
+    })
+
+  vim.api.nvim_create_autocmd("BufLeave", {
+    buffer = task_window.body.buf,
+    callback = function()
+      pcall(vim.api.nvim_win_close, task_window.title.win, true)
+      pcall(vim.api.nvim_win_close, task_window.background.win, true)
+    end
+  })
+end
+
+---@param task_window TaskWindow
+local fill_title = function (task_window)
+  local title_win_width = vim.api.nvim_win_get_width(task_window.title.win)
+  local title_win_height = vim.api.nvim_win_get_height(task_window.title.win)
+
+  local text = "TODOs for the current project"
+  local text_pos = {
+    x = math.floor((title_win_width - string.len(text)) / 2),
+    y = math.floor(title_win_height / 2)
+  }
+
+  local padding = string.rep(" ", text_pos.x)
+  local line_breaks = string.rep("\n", text_pos.y)
+
+  local content = line_breaks .. padding .. text
+
+  vim.api.nvim_buf_set_lines(task_window.title.buf, 0, -1, false, vim.split(content, "\n"))
+end
+
+---@param task_window TaskWindow
+local fill_tasks = function (task_window, root_dir)
+  local tasks = handler.search_tasks(root_dir)
+  local content = {}
+  for _, task in ipairs(tasks) do
+    table.insert(content, task.description)
   end
 
-  -- Create the window
-  local win = vim.api.nvim_open_win(buf, true, opts.config)
+  vim.api.nvim_buf_set_lines(task_window.body.buf, 0, -1, false, content)
+end
 
-  return { buf = buf, win = win }
+M.open = function ()
+  ---@type TaskWindow
+  local task_window = {
+    background = window.create_floating_window({ buf = -1, config = win_config.background }),
+    title = window.create_floating_window({ buf = -1, config = win_config.title }),
+    body = window.create_floating_window({ buf = -1, config = win_config.body }),
+  }
+
+  configure_task_window(task_window)
+
+  return task_window
+end
+
+---@param task_window TaskWindow
+---@param root_dir string
+M._fill = function (task_window, root_dir)
+  fill_title(task_window)
+  fill_tasks(task_window, root_dir)
+end
+
+---@param task_window TaskWindow
+M.fill = function (task_window)
+  M._fill(task_window, ".")
 end
 
 return M
