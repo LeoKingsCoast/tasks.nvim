@@ -1,0 +1,47 @@
+================================================================================
+                                                                  *tasks.nvim*
+
+This is a plugin to view and manage all tasks annotated in a given project. The 
+plugin looks for TODO comments and unchecked markdown checkboxes, and displays
+them in a window. The user can mark tasks as done in this window, and after
+writing changes to it, the TODO comments marked as done will be deleted, and
+the markdown checkboxes will be checked.
+
+                                                             *tasks.task.Task*
+    
+    Task type. Is a lua table formed by the following fields:
+
+    Fields: ~
+        {description} (string) Text describing the task
+        {done} (boolean) Text describing the task
+        {path} (table) Table containing {file_path} (string), {row} and {col}
+        (numbers) specifying the location in the project the task was found.
+        {markdown} (boolean?) Indicates if the task was found in a markdown 
+        checkbox. Should be nil otherwise.
+
+                                                           *tasks.get_tasks()*
+tasks.get_tasks({root_dir})
+
+    Return a table with all tasks found in the given directory. Defaults to 
+    project root directory if not specified.
+>
+        tasks = tasks.get_tasks()
+        tasks = tasks.get_tasks("example/directory")
+<
+
+    Parameters: ~
+        {root_dir}  (string?) Root directory where to start the search
+
+    Return: ~
+        (|tasks.task.Task|)
+
+                                                          *tasks.open_tasks()*
+tasks.open_tasks({root_dir})
+
+    Open a window and show all found tasks in the given directory. Defaults to
+    project root directory if not specified
+    
+    Parameters: ~
+        {root_dir}  (string?) Root directory where to start the search
+
+vim:tw=78:ts=8:ft=help:norl

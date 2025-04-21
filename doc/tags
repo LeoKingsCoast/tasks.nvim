@@ -1,0 +1,2 @@
+tasks.get_tasks()	tasks.txt	/*tasks.get_tasks()*
+tasks.nvim	tasks.txt	/*tasks.nvim*
