@@ -29,7 +29,9 @@ M.parse_task = function (grepped_string)
 
   if not desc then
     desc = content:match(mkdown_parser)
-    markdown = true
+    if desc then
+      markdown = true
+    end
   end
 
   -- If description or file_path parsing fails, this will return nil
