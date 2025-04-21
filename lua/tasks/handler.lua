@@ -15,6 +15,8 @@ local search = require("tasks.search")
 ---@param grepped_string string
 ---@return Task|nil
 M.parse_task = function (grepped_string)
+  local markdown = false
+
   local path_parser = "./(.*):(%d*):(%d*):(.*)"
   local path, row, col, content = grepped_string:match(path_parser)
 
@@ -23,10 +25,19 @@ M.parse_task = function (grepped_string)
   local hash_parser = "^%s*#%s*TODO:%s*(.*)"
   local mkdown_parser = "^%s*-%s*%[.%]%s*(.*)"
 
-  local desc = content:match(lua_parser) or content:match(c_parser) or content:match(hash_parser) or content:match(mkdown_parser)
+  local desc = content:match(lua_parser) or content:match(c_parser) or content:match(hash_parser)
+
+  if not desc then
+    desc = content:match(mkdown_parser)
+    markdown = true
+  end
 
   -- If description or file_path parsing fails, this will return nil
-  local new_task = task.new(desc, { file_path = path, row = row, col = col })
+  local new_task = task.new(desc, { file_path = path, row = row, col = col})
+
+  if markdown then
+    new_task.markdown = true
+  end
 
   return new_task
 end

@@ -87,6 +87,7 @@ describe("tasks.tasks", function ()
         col = 8,
       },
       done = false,
+      markdown = true,
       description = "Buy milk"
     }, handler.parse_task(grepped_task))
   end)

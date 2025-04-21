@@ -1,5 +1,6 @@
 local handler = require("tasks.handler")
 local task = require("tasks.task")
+local files = require("tasks.file_handling")
 
 ---@type Task[]
 local task_list = {}
@@ -7,6 +8,12 @@ local task_list = {}
 local root_dir_g
 
 local M = {}
+
+---@param str string
+---@return boolean
+local is_markdown = function (str)
+  return string.find(str, "- %[ %]") ~= nil
+end
 
 ---@param root_dir string
 ---@return Task[]
@@ -22,12 +29,22 @@ M.task_toggle = function (task_index)
   task.toggle(task_list[task_index])
 end
 
-M.jump_to_task = function ()
+M.jump_to_task = function (window, task_index)
+  files.jump_to(window, task_list[task_index].path)
 end
 
 M.write_state = function ()
-  for _, task_item in ipairs(task_list) do
+  for idx, task_item in ipairs(task_list) do
     if task_item.done then
+      if is_markdown(task_item.description) then
+        -- files.markdown_task_check(task_item.path)
+        print(task_item.description .. "--> Is markdown")
+      else
+        -- files.delete_line(task_item.path)
+        print(task_item.description .. "--> Is not markdown")
+      end
+
+      -- table.remove(task_list, idx)
     end
   end
 end

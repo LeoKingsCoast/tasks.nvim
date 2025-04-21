@@ -2,6 +2,7 @@
 ---@field description string
 ---@field done boolean
 ---@field path table
+---@field markdown? boolean
 
 M = {}
 

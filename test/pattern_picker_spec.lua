@@ -78,7 +78,7 @@ Nothing to see here
     local task_list = handler.search_tasks("./test/test_files")
     assert.are.same({
       { description = "Make sure to return 0", done = false, path = { file_path = "test/test_files/dir1/b", row = 3, col = 4 } },
-      { description = "Buy milk", done = false, path = { file_path = "test/test_files/dir2/c", row = 6, col = 1 } },
+      { description = "Buy milk", done = false, markdown = true, path = { file_path = "test/test_files/dir2/c", row = 6, col = 1 } },
     },
     task_list)
   end)

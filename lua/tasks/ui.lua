@@ -13,6 +13,8 @@ local y_pos = math.floor((vim.o.lines - win_height) / 2)
 local cursor_pos = {1, 1}
 local selection_pos = 1
 
+local task_list_empty = true
+
 local root_dir = "."
 
 ---@type vim.api.keyset.win_config[]
@@ -100,9 +102,18 @@ local configure_cursor = function (task_window)
   vim.api.nvim_create_autocmd("CursorMoved", {
     buffer = task_window.body.buf,
     callback = function ()
-      selection_pos = math.ceil(cursor_pos[1] / 2)
-      highlight_line(cursor_pos[1] - 1)
-      vim.print("Task number: " .. selection_pos)
+      if cursor_pos[1] % 2 == 0 then
+        cursor_pos[1] = cursor_pos[1] - 1
+      end
+      if cursor_pos[1] < 1 then
+        cursor_pos[1] = 1
+      end
+
+      if not task_list_empty then
+        selection_pos = math.ceil(cursor_pos[1] / 2)
+        highlight_line(cursor_pos[1] - 1)
+        vim.print("Task number: " .. selection_pos)
+      end
     end
   })
 
@@ -113,6 +124,9 @@ local configure_cursor = function (task_window)
     local body_lines = vim.api.nvim_buf_line_count(task_window.body.buf)
     if cursor_pos[1] > body_lines then
       cursor_pos[1] = body_lines - 1
+    end
+    if cursor_pos[1] < 1 then
+      cursor_pos[1] = 1
     end
 
     vim.api.nvim_win_set_cursor(task_window.body.win, cursor_pos)
@@ -173,6 +187,13 @@ end
 local fill_tasks = function (task_window, tasks)
   local content = {}
   local completion_marker
+
+  if #tasks == 0 then
+    task_list_empty = true
+  else
+    task_list_empty = false
+  end
+
   for _, task in ipairs(tasks) do
     if task.done then
       completion_marker = 'x'
@@ -198,6 +219,19 @@ local configure_commands = function (task_window)
   end, {
       buffer = task_window.body.buf
     })
+
+  vim.keymap.set("n", "gd", function ()
+    core.jump_to_task(original_win, selection_pos)
+  end, {
+      buffer = task_window.body.buf
+    })
+
+  vim.api.nvim_buf_create_user_command(task_window.body.buf, "W", function ()
+    core.write_state()
+    -- unlock_window(task_window)
+    -- fill_tasks(task_window, core.get_tasks(root_dir))
+    -- lock_window(task_window)
+  end, { force = true })
 end
 
 M.open = function ()
