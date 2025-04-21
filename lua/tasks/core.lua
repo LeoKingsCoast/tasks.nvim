@@ -7,13 +7,16 @@ local task_list = {}
 
 local root_dir_g
 
-local M = {}
-
----@param str string
----@return boolean
-local is_markdown = function (str)
-  return string.find(str, "- %[ %]") ~= nil
+local table_contains = function (tbl, searched_value)
+  for _, value in ipairs(tbl) do
+    if value == searched_value then
+      return true
+    end
+  end
+  return false
 end
+
+local M = {}
 
 ---@param root_dir string
 ---@return Task[]
@@ -34,19 +37,29 @@ M.jump_to_task = function (window, task_index)
 end
 
 M.write_state = function ()
+  local deleted = {}
   for idx, task_item in ipairs(task_list) do
     if task_item.done then
-      if is_markdown(task_item.description) then
-        -- files.markdown_task_check(task_item.path)
-        print(task_item.description .. "--> Is markdown")
+      if task_item.markdown then
+        files.markdown_task_check(task_item.path)
       else
-        -- files.delete_line(task_item.path)
-        print(task_item.description .. "--> Is not markdown")
+        files.delete_line(task_item.path)
       end
 
-      -- table.remove(task_list, idx)
+      -- Store the deleted tasks' indexes
+      table.insert(deleted, idx)
     end
   end
+
+  -- Create a new task list excluding the done (deleted) tasks
+  local new_task_list = {}
+  for idx, task_item in ipairs(task_list) do
+    if not table_contains(deleted, idx) then
+      table.insert(new_task_list, task_list[idx])
+    end
+  end
+
+  task_list = new_task_list
 end
 
 return M

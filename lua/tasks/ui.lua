@@ -228,9 +228,9 @@ local configure_commands = function (task_window)
 
   vim.api.nvim_buf_create_user_command(task_window.body.buf, "W", function ()
     core.write_state()
-    -- unlock_window(task_window)
-    -- fill_tasks(task_window, core.get_tasks(root_dir))
-    -- lock_window(task_window)
+    unlock_window(task_window)
+    fill_tasks(task_window, core.get_tasks(root_dir))
+    lock_window(task_window)
   end, { force = true })
 end
 
