@@ -6,12 +6,19 @@ local M = {}
 ---@field col number
 
 local replace_char = function (str, pos, ch)
-    return str:sub(1, pos-1) .. ch .. str:sub(pos+1)
+  return str:sub(1, pos-1) .. ch .. str:sub(pos+1)
 end
 
 ---@param path Path 
 M.jump_to = function (window, path)
-  vim.cmd("edit " .. vim.fn.fnameescape(path.file_path))
+  local bufnr = vim.fn.bufnr(path.file_path, true)
+
+  if not vim.api.nvim_buf_is_loaded(bufnr) then
+    vim.fn.bufload(bufnr)
+  end
+
+  vim.api.nvim_win_set_buf(window, bufnr)
+
   vim.api.nvim_win_set_cursor(window, { path.row, path.col })
 end
 
