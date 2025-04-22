@@ -2,7 +2,6 @@ local window = require("tasks.window")
 local core = require("tasks.core")
 
 local original_win
-local original_buf
 
 local win_width = math.floor(vim.o.columns * 0.7)
 local win_height = math.floor(vim.o.lines * 0.7)
@@ -228,6 +227,8 @@ local configure_commands = function (task_window)
 
   vim.api.nvim_buf_create_user_command(task_window.body.buf, "W", function ()
     core.write_state()
+    cursor_pos = { 1, 1 }
+    vim.api.nvim_win_set_cursor(task_window.body.win, cursor_pos)
     unlock_window(task_window)
     fill_tasks(task_window, core.get_tasks(root_dir))
     lock_window(task_window)
@@ -236,7 +237,8 @@ end
 
 M.open = function ()
   original_win = vim.api.nvim_get_current_win()
-  original_buf = vim.api.nvim_get_current_buf()
+  cursor_pos = { 1, 1 }
+
   ---@type TaskWindow
   local task_window = {
     background = window.create_floating_window({ buf = -1, config = win_config.background }),
