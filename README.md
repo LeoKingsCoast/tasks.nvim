@@ -4,11 +4,21 @@ This is a plugin to view and manage tasks (TODO Comments and/or Markdown Checkbo
 
 All found tasks will be displayed in a window, where you can check them as done and save changes. TODO Comments will be deleted and Markdown Checkboxes will be checked once changes are saved.
 
+https://github.com/user-attachments/assets/d4281d59-9512-4932-bfc0-e9fa1d2cc565
+
 ## Requirements
 
 - [Ripgrep](https://github.com/BurntSushi/ripgrep)
 
 ## Install
+
+Lazy.nvim:
+
+```lua
+{
+    "LeoKingsCoast/tasks.nvim"
+}
+```
 
 ## Usage
 
