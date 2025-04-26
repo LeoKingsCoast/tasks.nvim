@@ -29,7 +29,7 @@ describe("tasks.search", function ()
     files.b:write([[
 #include <stdio.h>
 
--- TODO: Make sure to return 0
+// TODO: Make sure to return 0
 int main(){
         printf("Hello, World!");
 }]], "w")
@@ -75,7 +75,7 @@ Nothing to see here
   end)
 
   it("search tasks generates a list of tasks based on the search results", function ()
-    local task_list = handler.search_tasks("./test/test_files")
+    local task_list = handler.search_tasks("./test/test_files", true, true)
     assert.are.same({
       { description = "Make sure to return 0", done = false, path = { file_path = "test/test_files/dir1/b", row = 3, col = 4 } },
       { description = "Buy milk", done = false, markdown = true, path = { file_path = "test/test_files/dir2/c", row = 6, col = 1 } },

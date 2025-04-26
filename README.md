@@ -40,6 +40,7 @@ Inside the tasks window:
 
 ## Future Development
 
+- [ ] Add an update function to redo the search
 - [ ] Improve task window appearance
 - [ ] Customizable behavior (ask before saving, closing window on save or on jump)
 - [ ] Customizable subdirectories to always look for tasks

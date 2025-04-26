@@ -44,10 +44,26 @@ M.parse_task = function (grepped_string)
   return new_task
 end
 
+---@param root_dir? string
+---@param search_todo boolean Defaults to true. Enable search for todo comments
+---@param search_md boolean Defaults to true. Enable search for markdown tasks
 ---@return Task[]
-M.search_tasks = function (root_dir)
+M.search_tasks = function (root_dir, search_todo, search_md)
+  local search_pattern
+  if search_todo then
+    search_pattern = "TODO:"
+  end
+
+  if search_md then
+    if search_pattern then
+      search_pattern = search_pattern .. "|- \\[ \\]"
+    else
+      search_pattern = "- \\[ \\]"
+    end
+  end
+
   local task_list = {}
-  local results = search.search("TODO:|- \\[ \\]", root_dir)
+  local results = search.search(search_pattern, root_dir)
   local new_task
 
   for _, result in ipairs(results) do

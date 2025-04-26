@@ -17,7 +17,7 @@ describe("tasks.file_handling", function ()
     files.b:write([[
 #include <stdio.h>
 
--- TODO: Make sure to return 0
+// TODO: Make sure to return 0
 int main(){
         printf("Hello, World!");
 }]], "w")

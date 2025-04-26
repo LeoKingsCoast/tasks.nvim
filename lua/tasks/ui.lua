@@ -255,18 +255,25 @@ end
 
 ---@param task_window TaskWindow
 ---@param dir string
-M._fill = function (task_window, dir)
+M._fill = function (task_window, todo_comments, md_tasks, dir)
   if dir then
     root_dir = dir
   end
   fill_title(task_window)
-  fill_tasks(task_window, core.get_tasks(root_dir))
+  fill_tasks(task_window, core.get_tasks(root_dir, todo_comments, md_tasks))
   lock_window(task_window)
 end
 
 ---@param task_window TaskWindow
-M.fill = function (task_window)
-  M._fill(task_window, ".")
+M.fill = function (task_window, todo_comments, md_tasks)
+  if todo_comments == nil then
+    todo_comments = true
+  end
+  if md_tasks == nil then
+    md_tasks = true
+  end
+
+  M._fill(task_window, todo_comments, md_tasks, ".")
 end
 
 return M
